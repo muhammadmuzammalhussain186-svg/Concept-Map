@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Science of Reading — Concept Map | Hussain MM (Muzamil)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f9fc;min-height:100vh;padding:16px}
+h1{font-size:18px;font-weight:600;color:#1a252f;margin-bottom:4px;text-align:center}
+h2{font-size:12px;font-weight:400;color:#5d6d7e;margin-bottom:12px;text-align:center}
+#filter-bar{display:flex;gap:6px;padding:0 0 10px;flex-wrap:wrap;justify-content:center}
+.fb{padding:5px 14px;font-size:11px;border-radius:20px;cursor:pointer;border:1px solid #ccc;font-weight:500;transition:all .18s;background:#f0f0f0;color:#555}
+.fb:hover{opacity:.85}
+.fb.on{color:#fff}
+#canvas-wrap{position:relative;background:#eef4f8;border-radius:14px;border:1px solid #d0dce8}
+canvas#c{display:block;width:100%;border-radius:14px}
+#detail{margin-top:10px;background:#fff;border:1px solid #d0dce8;border-radius:12px;padding:16px;min-height:130px}
+#d-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 9px;border-radius:10px;margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase}
+#d-title{font-size:15px;font-weight:600;color:#1a252f;margin-bottom:9px;line-height:1.35}
+#d-connections{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.conn-pill{font-size:10px;padding:3px 10px;border-radius:10px;cursor:pointer;border:1px solid transparent;font-weight:500;transition:opacity .15s}
+.conn-pill:hover{opacity:.7}
+#d-body{font-size:13px;color:#4a5568;line-height:1.75;margin-bottom:9px}
+#d-eg{font-size:12px;color:#718096;background:#f7fafc;border-radius:7px;padding:8px 12px;line-height:1.6;border-left:3px solid #cbd5e0}
+#d-default{font-size:13px;color:#a0aec0;text-align:center;padding:30px 0}
+#legend{display:flex;gap:14px;flex-wrap:wrap;padding:8px 0 4px;font-size:11px;color:#718096;align-items:center;justify-content:center}
+.leg{display:flex;align-items:center;gap:5px}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+footer{text-align:center;font-size:11px;color:#a0aec0;margin-top:14px}
+</style>
+</head>
+<body>
+<h1>Science of Reading — Interlinked Concept Map</h1>
+<h2>EDUC9134 Assignment 3 &nbsp;|&nbsp; Hussain MM (Muzamil) &nbsp;|&nbsp; Flinders University</h2>
+
+<div id="filter-bar">
+  <button class="fb on" style="background:#1D9E75;border-color:#0F6E56;color:#fff" onclick="filter('all',this)">All connections</button>
+  <button class="fb" onclick="filter('ethan',this)">Ethan's path</button>
+  <button class="fb" onclick="filter('liam',this)">Liam's path</button>
+  <button class="fb" onclick="filter('theory',this)">Theories</button>
+  <button class="fb" onclick="filter('activity',this)">Activities</button>
+  <button class="fb" onclick="filter('next',this)">Next steps</button>
+</div>
+
+<div id="canvas-wrap"><canvas id="c"></canvas></div>
+
+<div id="legend">
+  <strong>Click any node:</strong>
+  <span class="leg"><span class="leg-dot" style="background:#1D9E75"></span>Theory</span>
+  <span class="leg"><span class="leg-dot" style="background:#185FA5"></span>Case study</span>
+  <span class="leg"><span class="leg-dot" style="background:#D85A30"></span>Activity</span>
+  <span class="leg"><span class="leg-dot" style="background:#3B6D11"></span>Curriculum</span>
+  <span class="leg"><span class="leg-dot" style="background:#993C1D"></span>Next steps</span>
+  <span class="leg"><span class="leg-dot" style="background:#5F5E5A"></span>Assessment</span>
+</div>
+
+<div id="detail">
+  <div id="d-default">Click any coloured node on the map to explore its connections, theory links, and meaning</div>
+  <div id="d-badge" style="display:none"></div>
+  <div id="d-title" style="display:none"></div>
+  <div id="d-connections" style="display:none"></div>
+  <div id="d-body" style="display:none"></div>
+  <div id="d-eg" style="display:none"></div>
+</div>
+
+<footer>Open this file in any browser &nbsp;·&nbsp; Works offline &nbsp;·&nbsp; EDUC9134 Assignment 3 &copy; Hussain MM 2025</footer>
+
+<script>
+const PR=window.devicePixelRatio||1;
+const cv=document.getElementById('c');
+const wrap=document.querySelector('#canvas-wrap');
+const ctx=cv.getContext('2d');
+const W=680,H=560;
+
+const NODES={
+  svr:  {x:60, y:48, w:190,h:46,col:'#1D9E75',tc:'#E1F5EE',sc:'#0F6E56',label:'Simple View of Reading',sub:'RC = Decoding × Comprehension',group:'theory'},
+  ehri: {x:268,y:48, w:160,h:46,col:'#7F77DD',tc:'#EEEDFE',sc:'#534AB7',label:"Ehri's Phase Model",sub:'Partial → Full → Consolidated',group:'theory'},
+  scarb:{x:445,y:48, w:160,h:46,col:'#7F77DD',tc:'#EEEDFE',sc:'#534AB7',label:"Scarborough's Rope",sub:'Word recognition + language',group:'theory'},
+  vyg:  {x:268,y:124,w:160,h:46,col:'#EF9F27',tc:'#412402',sc:'#BA7517',label:"Vygotsky's ZPD",sub:'I Do → We Do → You Do',group:'theory'},
+  dibels:{x:258,y:204,w:172,h:46,col:'#5F5E5A',tc:'#F1EFE8',sc:'#444441',label:'DIBELS Assessment',sub:'NWF · ORF · Accuracy · Maze',group:'assess'},
+  ethan:{x:80, y:298,w:172,h:56,col:'#185FA5',tc:'#E6F1FB',sc:'#0C447C',label:'Ethan — Gr 2, Age 7',sub:'All 4 scores: Intensive',sub2:'NWF=3 · ORF=25 · Acc=75% · Maze=4',group:'case'},
+  liam: {x:436,y:298,w:162,h:56,col:'#185FA5',tc:'#E6F1FB',sc:'#0C447C',label:'Liam — Gr 4, Age 9',sub:'3 scores: Intensive',sub2:'ORF=35 · Acc=85% · Maze=4',group:'case'},
+  ea:   {x:50, y:400,w:200,h:66,col:'#D85A30',tc:'#FAECE7',sc:'#993C1D',label:'Sky Pattern Fluency Relay',sub:'Science Yr 2 · CC 2.4',sub2:'Echo · Repeated reading · Fluency graph',group:'activity'},
+  la:   {x:440,y:400,w:188,h:66,col:'#D85A30',tc:'#FAECE7',sc:'#993C1D',label:'Art Word Detectives',sub:'Arts Yr 4 · CC 2.4',sub2:'Morpheme map · Word detective · You Do',group:'activity'},
+  ce:   {x:50, y:496,w:190,h:46,col:'#3B6D11',tc:'#EAF3DE',sc:'#27500A',label:'AC9S2U01 / AC9S2I01',sub:'Sky patterns · Science Yr 2',group:'curric'},
+  cl:   {x:440,y:496,w:190,h:46,col:'#3B6D11',tc:'#EAF3DE',sc:'#27500A',label:'AC9ADA/ADR/AMA4E02',sub:'First Nations Arts · Yr 4',group:'curric'},
+  nx:   {x:256,y:496,w:168,h:46,col:'#993C1D',tc:'#FAECE7',sc:'#712B13',label:'Next Steps',sub:'Monitor · Refer · Target',group:'next'},
+};
+
+const EDGES=[
+  {a:'svr',  b:'ethan',lbl:'diagnoses',  col:'#1D9E75',g:['all','ethan','theory']},
+  {a:'svr',  b:'liam', lbl:'diagnoses',  col:'#1D9E75',g:['all','liam','theory']},
+  {a:'svr',  b:'ea',   lbl:'justifies',  col:'#1D9E75',g:['all','ethan','theory','activity']},
+  {a:'svr',  b:'la',   lbl:'justifies',  col:'#1D9E75',g:['all','liam','theory','activity']},
+  {a:'ehri', b:'ea',   lbl:'phase target',col:'#7F77DD',g:['all','ethan','theory','activity']},
+  {a:'ehri', b:'la',   lbl:'phase target',col:'#7F77DD',g:['all','liam','theory','activity']},
+  {a:'scarb',b:'ea',   lbl:'both strands',col:'#9b93e8',g:['all','ethan','theory','activity']},
+  {a:'scarb',b:'la',   lbl:'both strands',col:'#9b93e8',g:['all','liam','theory','activity']},
+  {a:'vyg',  b:'ea',   lbl:'structures', col:'#EF9F27',g:['all','ethan','theory','activity']},
+  {a:'vyg',  b:'la',   lbl:'structures', col:'#EF9F27',g:['all','liam','theory','activity']},
+  {a:'dibels',b:'ethan',lbl:'red zone',  col:'#888780',g:['all','ethan','assess']},
+  {a:'dibels',b:'liam', lbl:'red zone',  col:'#888780',g:['all','liam','assess']},
+  {a:'dibels',b:'nx',   lbl:'sets targets',col:'#888780',g:['all','next','assess']},
+  {a:'ethan',b:'ea',   lbl:'needs',      col:'#378ADD',g:['all','ethan','activity']},
+  {a:'liam', b:'la',   lbl:'needs',      col:'#378ADD',g:['all','liam','activity']},
+  {a:'ea',   b:'ce',   lbl:'delivers',   col:'#D85A30',g:['all','ethan','activity','curric']},
+  {a:'la',   b:'cl',   lbl:'delivers',   col:'#D85A30',g:['all','liam','activity','curric']},
+  {a:'ea',   b:'nx',   lbl:'informs',    col:'#c0502a',g:['all','ethan','activity','next']},
+  {a:'la',   b:'nx',   lbl:'informs',    col:'#c0502a',g:['all','liam','activity','next']},
+  {a:'svr',  b:'nx',   lbl:'evidence',   col:'#1D9E75',g:['all','theory','next']},
+];
+
+const INFO={
+  svr:{badge:'Theory',bcol:'#1D9E75',
+    title:'Simple View of Reading — the foundation of everything',
+    conns:[{lbl:'Justifies Ethan activity',key:'ea',col:'#D85A30'},{lbl:'Justifies Liam activity',key:'la',col:'#D85A30'},{lbl:'Links to DIBELS',key:'dibels',col:'#5F5E5A'},{lbl:'Drives next steps',key:'nx',col:'#993C1D'}],
+    body:'RC = Decoding × Language Comprehension. This single formula explains WHY both children fail. Ethan NWF=3, Liam ORF=35 — near zero decoding means comprehension is ZERO no matter what. Every step in both activities targets decoding first. Without this theory, the activities are just guesswork. Reference: Gough & Tunmer (1986).',
+    eg:'A car analogy: engine = decoding, steering = comprehension. No engine = you go nowhere, no matter how well you can steer.'
+  },
+  ehri:{badge:'Theory',bcol:'#7F77DD',
+    title:"Ehri's Phase Model — why THESE specific strategies",
+    conns:[{lbl:'Shapes Ethan strategy',key:'ea',col:'#D85A30'},{lbl:'Shapes Liam strategy',key:'la',col:'#D85A30'}],
+    body:"Both students stuck in Partial Alphabetic Phase — see 'pattern' and guess 'park' from first letter only. Ethan must move to Full Alphabetic (decode every letter). Liam must move to Consolidated Alphabetic (read by morpheme chunks). That is WHY Ethan uses word flash cards + repeated reading, and Liam uses morpheme mapping. Reference: Ehri (2005).",
+    eg:"Ethan: sees 'pattern' → reads 'park'. Flash card drill trains him to process the WHOLE word. Liam: sees 'performance' → per+form+ance. Morpheme mapping breaks the guessing habit."
+  },
+  scarb:{badge:'Theory',bcol:'#7F77DD',
+    title:"Scarborough's Reading Rope — why both strands need attention",
+    conns:[{lbl:'Applied in Ethan activity',key:'ea',col:'#D85A30'},{lbl:'Applied in Liam activity',key:'la',col:'#D85A30'}],
+    body:"A rope made of threads: Word Recognition (decoding, phonics, sight words) + Language Comprehension (vocabulary, background knowledge). Both children have unravelled Word Recognition threads. Ethan's role-play physically connects meaning to words — strengthening BOTH strands. Liam's morpheme work repairs word recognition AND builds vocabulary meaning together. Reference: Scarborough (2001).",
+    eg:'A rope with broken threads cannot hold weight. Comprehension questions in both activities ensure decoding is never practised in isolation from meaning — threads woven together.'
+  },
+  vyg:{badge:'Theory',bcol:'#EF9F27',
+    title:"Vygotsky's ZPD — why I Do → We Do → You Do works",
+    conns:[{lbl:'Structures Ethan activity',key:'ea',col:'#D85A30'},{lbl:'Structures Liam activity',key:'la',col:'#D85A30'}],
+    body:'Zone of Proximal Development: Too Easy (no growth) · Too Hard (frustration) · Just Right ZPD (can do WITH support). I Do = teacher models fully. We Do = teacher + student together. You Do = student fully independent. Without this structure, asking a struggling reader to just try harder puts them in the Too Hard zone — which causes anxiety, not learning. Reference: Vygotsky (1978).',
+    eg:'Like a swimming instructor: demonstrates (I Do), holds you in the water (We Do), lets go (You Do). You would never throw a non-swimmer in the deep end.'
+  },
+  dibels:{badge:'Assessment',bcol:'#5F5E5A',
+    title:'DIBELS — what diagnosed the problem with precision',
+    conns:[{lbl:'Diagnoses Ethan',key:'ethan',col:'#185FA5'},{lbl:'Diagnoses Liam',key:'liam',col:'#185FA5'},{lbl:'Sets next step targets',key:'nx',col:'#993C1D'}],
+    body:'NWF = can child sound out nonsense words? ORF = words per minute read correctly? Accuracy = % words right? Maze = comprehension. All Red = Intensive support needed. Without DIBELS numbers, activities would be guesswork. With them, every step targets a specific red score. Next step targets (e.g. 91–95% accuracy) come directly from DIBELS benchmarks. Reference: University of Oregon (2023).',
+    eg:'Like a blood test — without it the doctor guesses. With it, they know exactly what to prescribe and what number to hit in the follow-up.'
+  },
+  ethan:{badge:'Case Study',bcol:'#185FA5',
+    title:'Ethan — Age 7, Grade 2, all 4 DIBELS measures: Intensive',
+    conns:[{lbl:'Assessed by DIBELS',key:'dibels',col:'#5F5E5A'},{lbl:'Explained by SVR',key:'svr',col:'#1D9E75'},{lbl:'Gets Activity 3',key:'ea',col:'#D85A30'}],
+    body:'NWF-WWR=3 (benchmark 20–35). ORF=25 wcpm (benchmark 78–116). Accuracy=75% (benchmark 96%+). Maze=4 (benchmark 9–14). All Red Intensive. Partial Alphabetic Phase (Ehri) — decodes letter by letter. SVR: near-zero decoding collapses comprehension. Reading difficulty now blocks access to Science curriculum AC9S2U01/AC9S2I01.',
+    eg:'Reads only 25 words per minute when a typical Grade 2 child reads 78–116. That is less than one-third of expected speed — every single lesson is a struggle.'
+  },
+  liam:{badge:'Case Study',bcol:'#185FA5',
+    title:'Liam — Age 9, Grade 4, approximately 3 grade levels behind',
+    conns:[{lbl:'Assessed by DIBELS',key:'dibels',col:'#5F5E5A'},{lbl:'Explained by SVR',key:'svr',col:'#1D9E75'},{lbl:'Gets Activity 3',key:'la',col:'#D85A30'}],
+    body:'ORF=35 wcpm (benchmark 121–158). Accuracy=85% (benchmark 96%+, Red Intensive). Maze=4 (benchmark 16.5–23). Guesses from initial letters — Partial Alphabetic Phase. Cannot decode multisyllabic words like performance or tradition — blocking access to First Nations Arts curriculum AC9ADA/ADR/AMA4E02.',
+    eg:"Seeing 'performance' and reading 'person' = guessing from first letters instead of decoding the full word. Arts vocabulary requires exactly the decoding skill he lacks."
+  },
+  ea:{badge:'Activity — Ethan',bcol:'#D85A30',
+    title:'Sky Pattern Fluency Relay — why THIS activity for Ethan',
+    conns:[{lbl:'SVR justifies it',key:'svr',col:'#1D9E75'},{lbl:"Ehri shapes it",key:'ehri',col:'#7F77DD'},{lbl:'Vygotsky structures it',key:'vyg',col:'#EF9F27'},{lbl:'Scarborough guides it',key:'scarb',col:'#7F77DD'},{lbl:'Delivers curriculum',key:'ce',col:'#3B6D11'},{lbl:'Leads to next steps',key:'nx',col:'#993C1D'}],
+    body:'Every step has a theory: I Do (Vygotsky — model in ZPD). Echo reading (Vygotsky We Do — fix 75% accuracy). Role-play (Scarborough — connect both rope strands). Partner reading x3 tracking wcpm (SVR + Hall et al. 2023). Word flash: orbit, rotate, lunar, constellation (Ehri — move to Full Alphabetic). 3 comprehension Qs on sky patterns (Gough & Tunmer — fix Maze from 4 to 9). Set in Science Yr 2 = CC 2.4 compliant.',
+    eg:'Echo reading fixes accuracy. Repeated reading fixes fluency (25 to 78 wcpm). Word flash fixes NWF (3 to 20+). Comprehension Qs fix Maze (4 to 9). Nothing is random — every step targets a red DIBELS score.'
+  },
+  la:{badge:'Activity — Liam',bcol:'#D85A30',
+    title:'Art Word Detectives — why THIS activity for Liam',
+    conns:[{lbl:'SVR justifies it',key:'svr',col:'#1D9E75'},{lbl:"Ehri shapes it",key:'ehri',col:'#7F77DD'},{lbl:'Vygotsky structures it',key:'vyg',col:'#EF9F27'},{lbl:'Scarborough guides it',key:'scarb',col:'#7F77DD'},{lbl:'Delivers curriculum',key:'cl',col:'#3B6D11'},{lbl:'Leads to next steps',key:'nx',col:'#993C1D'}],
+    body:'Every step justified: Morpheme mapping (Ehri — move to Consolidated Alphabetic, Moats 2020). Colour-coded syllable splitting (Hall et al. 2023). Guided oral reading (Vygotsky ZPD We Do). Independent reading + new word selection (Vygotsky You Do — full independence). 3 comprehension Qs on First Nations arts (Scarborough — both rope strands, Maze 4 to 14.5). Set in Arts Yr 4 = CC 2.4 compliant.',
+    eg:"Breaking 'storytelling' = story + tell + ing. Now a scary 12-letter word becomes 3 small pieces Liam already knows. That is Ehri's Consolidated Phase in action."
+  },
+  ce:{badge:'Curriculum',bcol:'#3B6D11',
+    title:'AC9S2U01 / AC9S2I01 — why Science is the chosen subject',
+    conns:[{lbl:'Delivered by Ethan activity',key:'ea',col:'#D85A30'}],
+    body:'CC 2.4 requires explicit reading instruction in NON-English subjects. AC9S2U01: students recognise Earth in the solar system and sky patterns. AC9S2I01: students pose questions and make predictions. Ethan cannot read the Science textbook at all — the activity fixes his reading WHILE delivering Science content simultaneously. Two curriculum goals achieved in one lesson. Reference: ACARA (2022).',
+    eg:"Ethan reading 'The sun rises in the morning and sets at night' is not just reading practice — it IS the Science curriculum content. Reading IS the lesson."
+  },
+  cl:{badge:'Curriculum',bcol:'#3B6D11',
+    title:'AC9ADA/ADR/AMA4E02 — why The Arts is chosen for Liam',
+    conns:[{lbl:'Delivered by Liam activity',key:'la',col:'#D85A30'}],
+    body:'CC 2.4 requires explicit reading in non-English subjects. These three Arts codes require students to explore how First Nations Australians use dance, drama, and media arts to communicate connection to Country/Place. The vocabulary — connection, tradition, performance, storytelling — are exactly the multisyllabic words Liam cannot decode. Chosen subject makes decoding practice culturally meaningful. Reference: ACARA (2022).',
+    eg:"Liam decoding 'storytelling' is not just a reading exercise — he is learning about First Nations culture, a mandatory curriculum expectation. Two goals, one activity."
+  },
+  nx:{badge:'Next Steps',bcol:'#993C1D',
+    title:'Next steps — evidence-connected, not guesswork',
+    conns:[{lbl:'Informed by Ethan activity',key:'ea',col:'#D85A30'},{lbl:'Informed by Liam activity',key:'la',col:'#D85A30'},{lbl:'Targets from DIBELS',key:'dibels',col:'#5F5E5A'},{lbl:'Grounded in SVR',key:'svr',col:'#1D9E75'}],
+    body:'ETHAN: Monitor ORF weekly — expect 1–2 words/week growth (U of Oregon 2023). No growth after 6 weeks → 5 sessions/week + phonological awareness (Al Otaiba et al. 2023). Goal = Full Alphabetic Phase (Ehri). Refer to literacy specialist. LIAM: Target 91–95% accuracy within 6–8 weeks (Yellow zone). Once decoding stabilises → summarising + inferencing (Shapiro & Bellows 2025). Refer to literacy specialist or educational psychologist.',
+    eg:'If Ethan goes 25 to 35 wcpm in 6 weeks: growth is happening, continue. If it stays at 25: escalate to Tier 3 + specialist referral. The DIBELS benchmark IS the decision rule.'
+  }
+};
+
+let currentFilter='all',selectedNode=null,hoverNode=null;
+function cx(n){return n.x+n.w/2} function cy(n){return n.y+n.h/2}
+function edgeVisible(e){return e.g.includes(currentFilter)}
+function nodeVisible(k){
+  if(currentFilter==='all') return true;
+  return EDGES.some(e=>(e.a===k||e.b===k)&&e.g.includes(currentFilter));
+}
+function nodeAlpha(k){return nodeVisible(k)?1:0.1;}
+function edgeAlpha(e){return edgeVisible(e)?1:0.05;}
+
+function drawNode(k,alpha){
+  const n=NODES[k];
+  ctx.globalAlpha=alpha;
+  ctx.fillStyle=n.col; ctx.strokeStyle=selectedNode===k?'#fff':n.sc;
+  ctx.lineWidth=selectedNode===k?2.5:0.8;
+  rr(n.x,n.y,n.w,n.h,9); ctx.fill(); ctx.stroke();
+  if(hoverNode===k&&selectedNode!==k){ctx.globalAlpha=alpha*0.15;ctx.fillStyle='#fff';rr(n.x,n.y,n.w,n.h,9);ctx.fill();}
+  ctx.globalAlpha=alpha; ctx.fillStyle=n.tc; ctx.textAlign='center';
+  const hasTwo=!!n.sub2;
+  const ly=hasTwo?n.y+n.h/2-11:n.y+n.h/2-8;
+  ctx.font='600 12px -apple-system,sans-serif'; ctx.fillText(n.label,cx(n),ly);
+  ctx.font='10px -apple-system,sans-serif'; ctx.globalAlpha=alpha*0.82;
+  ctx.fillText(n.sub,cx(n),ly+15);
+  if(n.sub2){ctx.fillText(n.sub2,cx(n),ly+28);}
+  ctx.globalAlpha=1;
+}
+
+function drawEdge(e,alpha){
+  if(alpha<0.02) return;
+  const a=NODES[e.a],b=NODES[e.b];
+  const ax=cx(a),ay=a.y+a.h,bx=cx(b),by=b.y;
+  ctx.globalAlpha=alpha; ctx.strokeStyle=e.col; ctx.lineWidth=1.4;
+  const dash=e.g.includes('theory')&&!['ethan','liam'].includes(e.b);
+  ctx.setLineDash(dash?[5,3]:[]);
+  ctx.beginPath(); ctx.moveTo(ax,ay);
+  ctx.bezierCurveTo(ax,ay+28,bx,by-28,bx,by);
+  ctx.stroke(); ctx.setLineDash([]);
+  drawArrow(bx,by,e.col);
+  ctx.globalAlpha=1;
+}
+
+function drawArrow(x,y,col){
+  ctx.fillStyle=col; ctx.beginPath();
+  ctx.moveTo(x,y); ctx.lineTo(x-5,y-9); ctx.lineTo(x+5,y-9);
+  ctx.closePath(); ctx.fill();
+}
+
+function rr(x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);
+  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);
+  ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+
+function draw(){
+  ctx.save();
+  const s=cv.offsetWidth/W;
+  ctx.scale(s*PR,s*PR);
+  ctx.clearRect(0,0,W*10,H*10);
+  EDGES.forEach(e=>drawEdge(e,edgeAlpha(e)));
+  Object.keys(NODES).forEach(k=>drawNode(k,nodeAlpha(k)));
+  ctx.restore();
+}
+
+function resize(){
+  const r=wrap.offsetWidth;
+  cv.width=r*PR; cv.height=(H/W*r)*PR;
+  cv.style.width=r+'px'; cv.style.height=(H/W*r)+'px';
+  draw();
+}
+
+function getNode(mx,my){
+  const ratio=W/cv.offsetWidth;
+  const rx=mx*ratio,ry=my*ratio;
+  return Object.keys(NODES).find(k=>{
+    const n=NODES[k];
+    return rx>=n.x&&rx<=n.x+n.w&&ry>=n.y&&ry<=n.y+n.h;
+  });
+}
+
+cv.addEventListener('click',e=>{
+  const r=cv.getBoundingClientRect();
+  const node=getNode(e.clientX-r.left,e.clientY-r.top);
+  selectedNode=node||null; showInfo(node); draw();
+});
+cv.addEventListener('mousemove',e=>{
+  const r=cv.getBoundingClientRect();
+  const node=getNode(e.clientX-r.left,e.clientY-r.top);
+  cv.style.cursor=node?'pointer':'default';
+  if(node!==hoverNode){hoverNode=node;draw();}
+});
+cv.addEventListener('mouseleave',()=>{hoverNode=null;draw();});
+cv.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  const r=cv.getBoundingClientRect();
+  const t=e.touches[0];
+  const node=getNode(t.clientX-r.left,t.clientY-r.top);
+  selectedNode=node||null; showInfo(node); draw();
+},{passive:false});
+
+function showInfo(key){
+  const def=document.getElementById('d-default');
+  const badge=document.getElementById('d-badge');
+  const title=document.getElementById('d-title');
+  const conns=document.getElementById('d-connections');
+  const body=document.getElementById('d-body');
+  const eg=document.getElementById('d-eg');
+  if(!key||!INFO[key]){
+    def.style.display='';badge.style.display='none';title.style.display='none';
+    conns.style.display='none';body.style.display='none';eg.style.display='none';
+    return;
+  }
+  const d=INFO[key];
+  def.style.display='none';
+  badge.style.display='inline-block';
+  badge.textContent=d.badge;
+  badge.style.background=d.bcol+'22';
+  badge.style.color=d.bcol;
+  badge.style.border='1px solid '+d.bcol+'44';
+  title.style.display='';title.textContent=d.title;
+  conns.style.display='';conns.innerHTML='';
+  d.conns.forEach(c=>{
+    const p=document.createElement('span');
+    p.className='conn-pill';p.textContent=c.lbl;
+    p.style.background=c.col+'18';p.style.color=c.col;p.style.borderColor=c.col+'44';
+    p.onclick=()=>{selectedNode=c.key;showInfo(c.key);draw();};
+    conns.appendChild(p);
+  });
+  body.style.display='';body.textContent=d.body;
+  eg.style.display='';eg.textContent='Example: '+d.eg;
+}
+
+function filter(f,btn){
+  currentFilter=f; selectedNode=null; showInfo(null);
+  document.querySelectorAll('.fb').forEach(b=>{
+    b.classList.remove('on');b.style.background='';b.style.borderColor='';b.style.color='';
+  });
+  btn.classList.add('on');
+  const cols={all:'#1D9E75',ethan:'#185FA5',liam:'#185FA5',theory:'#7F77DD',activity:'#D85A30',next:'#993C1D'};
+  btn.style.background=cols[f];btn.style.borderColor=cols[f];btn.style.color='#fff';
+  draw();
+}
+
+window.addEventListener('resize',resize);
+resize();
+</script>
+</body>
+</html>
